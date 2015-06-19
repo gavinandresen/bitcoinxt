@@ -82,14 +82,15 @@ public:
     virtual const Checkpoints::CCheckpointData& Checkpoints() const = 0;
 
     /** Maximum block size of a block with timestamp nBlockTimestamp */
+    int ActivateSizeForkMajority() const { return nActivateSizeForkMajority; }
+    uint64_t SizeForkGracePeriod() const { return nSizeForkGracePeriod; }
     uint64_t MaxBlockSize(uint64_t nBlockTimestamp) const {
         if (nBlockTimestamp < nEarliestSizeForkTime || nBlockTimestamp < nSizeForkActivationTime)
             return nMaxSizePreFork;
         if (nBlockTimestamp >= nEarliestSizeForkTime + nSizeDoubleEpoch * nMaxSizeDoublings)
             return nMaxSizeBase << nMaxSizeDoublings;
 
-        // Piecewise-linear-between-doublings approximation of the ideal
-        // exponential function:
+        // Piecewise-linear-between-doublings growth:
         uint64_t timeDelta = nBlockTimestamp - nEarliestSizeForkTime;
         uint64_t doublings = timeDelta / nSizeDoubleEpoch;
         uint64_t remainder = timeDelta % nSizeDoubleEpoch;
@@ -132,6 +133,8 @@ protected:
     uint32_t nSizeDoubleEpoch;
     uint64_t nMaxSizeBase;
     uint8_t nMaxSizeDoublings;
+    int nActivateSizeForkMajority;
+    uint64_t nSizeForkGracePeriod;
 
     int64_t nTargetTimespan;
     int64_t nTargetSpacing;
